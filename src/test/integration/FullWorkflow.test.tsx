@@ -11,8 +11,7 @@ describe('Full Application User Workflow Integration', () => {
       </LanguageProvider>
     );
 
-    // Title and badge
-    expect(screen.getByText(/Tesis \/ Penelitian ASR Bahasa Indonesia/i)).toBeInTheDocument();
+    // Title
     expect(screen.getByText(/Evaluasi Komparatif Whisper-Small: Base vs. LoRA/i)).toBeInTheDocument();
 
     // Dual-mode switcher
@@ -20,7 +19,7 @@ describe('Full Application User Workflow Integration', () => {
     expect(screen.getByText(/Mode Bebas \(Uji Suara Langsung\)/i)).toBeInTheDocument();
 
     // Default Teleprompter prompt #1
-    expect(screen.getByText(/Prompt #1 \/ 5/i)).toBeInTheDocument();
+    expect(screen.getByText(/Kasus 1/i)).toBeInTheDocument();
 
     // Models cards
     expect(screen.getByText('Baseline: OpenAI Whisper-Small')).toBeInTheDocument();
@@ -58,17 +57,18 @@ describe('Full Application User Workflow Integration', () => {
     );
 
     // Teleprompter is present in Benchmark mode
-    expect(screen.getByText(/Prompt #1 \/ 5/i)).toBeInTheDocument();
+    expect(screen.getByText(/Kasus 1/i)).toBeInTheDocument();
 
     // Switch to Free-Form mode
     const freeformTab = screen.getByText(/Mode Bebas \(Uji Suara Langsung\)/i);
     fireEvent.click(freeformTab);
 
     // Teleprompter prompt counter should no longer be present
-    expect(screen.queryByText(/Prompt #1 \/ 5/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Kasus 1/i)).not.toBeInTheDocument();
 
-    // Free-form description banner should appear
-    expect(screen.getByText(/Mode Bebas: Uji Suara Langsung Tanpa Teks Referensi/i)).toBeInTheDocument();
+    // Free-form title (h1) and subtitle (h2) should appear
+    expect(screen.getByRole('heading', { level: 1, name: /Mode Bebas/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: /Uji Suara Langsung Tanpa Teks Referensi/i })).toBeInTheDocument();
   });
 
   it('opens and closes API settings modal', () => {

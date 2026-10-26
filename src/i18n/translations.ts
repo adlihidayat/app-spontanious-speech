@@ -88,7 +88,21 @@ export const translations = {
     // Tooltips & Misc
     sample_badge: "Contoh",
     audio_required_alert: "Silakan rekam audio atau unggah file terlebih dahulu!",
-    reference_required_alert: "Teks referensi tidak boleh kosong pada Mode Evaluasi."
+    reference_required_alert: "Teks referensi tidak boleh kosong pada Mode Evaluasi.",
+    mode_eval_title: "Mode Evaluasi",
+    mode_eval_subtitle: "Katakan kalimat dibawah",
+    mode_freeform_title: "Mode Bebas",
+    mode_freeform_subtitle: "Uji Suara Langsung Tanpa Teks Referensi",
+    case_label: "Kasus",
+    audio_attached: "Audio terpasang",
+    audio_hint_empty: "Unggah file atau gunakan mic",
+    clear_audio_btn: "Hapus Audio",
+    audio_record_or_upload_first: "Rekam atau unggah audio terlebih dahulu",
+    voice_recording_name: "Rekaman Suara",
+    mic_error_denied: "Akses mikrofon ditolak oleh browser. Mohon izinkan mikrofon.",
+    mic_error_not_found: "Perangkat mikrofon tidak ditemukan atau tidak didukung.",
+    upload_format_error: "Format tidak didukung. Harap gunakan file: {formats}",
+    upload_size_error: "Ukuran file melebihi batas {max}MB."
   },
 
   en: {
@@ -180,7 +194,21 @@ export const translations = {
     // Tooltips & Misc
     sample_badge: "Sample",
     audio_required_alert: "Please record audio or upload an audio file first!",
-    reference_required_alert: "Reference text cannot be empty in Benchmark Mode."
+    reference_required_alert: "Reference text cannot be empty in Benchmark Mode.",
+    mode_eval_title: "Benchmark Mode",
+    mode_eval_subtitle: "Read the sentence below",
+    mode_freeform_title: "Free-Form Mode",
+    mode_freeform_subtitle: "Live Voice Test Without Reference Text",
+    case_label: "Case",
+    audio_attached: "Audio attached",
+    audio_hint_empty: "Upload a file or use mic",
+    clear_audio_btn: "Clear Audio",
+    audio_record_or_upload_first: "Please record or upload audio first",
+    voice_recording_name: "Voice Recording",
+    mic_error_denied: "Microphone access denied by browser. Please allow microphone permissions.",
+    mic_error_not_found: "Microphone device not found or not supported.",
+    upload_format_error: "Unsupported format. Please use file: {formats}",
+    upload_size_error: "File size exceeds {max}MB limit."
   }
 };
 

@@ -21,9 +21,9 @@ describe('PromptTeleprompter integration', () => {
       </LanguageProvider>
     );
 
-    expect(screen.getByText(/Prompt #1 \/ 5/i)).toBeInTheDocument();
+    expect(screen.getByText(/Kasus 1/i)).toBeInTheDocument();
     expect(screen.getByText(`"${prompt.text}"`)).toBeInTheDocument();
-    expect(screen.getByText(prompt.category)).toBeInTheDocument();
+    expect(screen.getByText((content) => content.includes(prompt.category))).toBeInTheDocument();
 
     // Verify Acak Kalimat button exists
     expect(screen.getByRole('button', { name: /Acak Kalimat/i })).toBeInTheDocument();
