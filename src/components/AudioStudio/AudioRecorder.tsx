@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { Button } from '../ui/button';
 import { Mic, Square, RotateCcw, AlertTriangle } from 'lucide-react';
 
 interface AudioRecorderProps {
@@ -27,7 +28,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Clean up on unmount
   useEffect(() => {
     return () => {
       stopStreamsAndAudioContext();
@@ -49,7 +49,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
   const startWaveformVisualizer = (stream: MediaStream) => {
     try {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const audioCtx = new AudioCtx();
       audioContextRef.current = audioCtx;
       const analyser = audioCtx.createAnalyser();
@@ -81,10 +83,9 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
         for (let i = 0; i < bufferLength; i++) {
           barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
 
-          // Gradient color from indigo to emerald
           const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
-          gradient.addColorStop(0, '#4f46e5'); // Indigo-600
-          gradient.addColorStop(1, '#10b981'); // Emerald-500
+          gradient.addColorStop(0, '#18181b');
+          gradient.addColorStop(1, '#71717a');
 
           ctx.fillStyle = gradient;
           ctx.beginPath();
@@ -97,7 +98,7 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
       draw();
     } catch (e) {
-      console.warn('Waveform visualizer setup failed, fallback to animation', e);
+      console.warn('Waveform visualizer setup failed', e);
     }
   };
 
@@ -117,7 +118,6 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
 
       streamRef.current = stream;
 
-      // Determine mime type
       const mimeTypes = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
       const supportedMime = mimeTypes.find((m) => MediaRecorder.isTypeSupported(m)) || '';
 
@@ -144,26 +144,37 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
       setIsRecording(true);
       startWaveformVisualizer(stream);
 
-      // Start timer
       timerIntervalRef.current = window.setInterval(() => {
-        setRecordingSeconds((prev) => prev + 1);
+        setRecordingSeconds((prev) => {
+          if (prev >= 60) {
+            stopRecording();
+            return prev;
+          }
+          return prev + 1;
+        });
       }, 1000);
-    } catch (err: unknown) {
-      console.error('Microphone access denied or error:', err);
-      const message = err instanceof Error ? err.message : 'Izin mikrofon ditolak atau tidak ditemukan.';
-      setMicError(`Gagal mengakses mikrofon: ${message}`);
-      setIsRecording(false);
+    } catch (err) {
+      console.error('Microphone error:', err);
+      const isPermissionDenied =
+        err instanceof DOMException &&
+        (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError');
+      setMicError(
+        isPermissionDenied
+          ? 'Akses mikrofon ditolak oleh browser. Mohon izinkan izin mikrofon.'
+          : 'Perangkat mikrofon tidak ditemukan atau tidak didukung.'
+      );
+      stopStreamsAndAudioContext();
     }
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-        timerIntervalRef.current = null;
-      }
+    }
+    setIsRecording(false);
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
     }
   };
 
@@ -174,87 +185,78 @@ export const AudioRecorder: React.FC<AudioRecorderProps> = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {micError && (
-        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 flex-shrink-0" />
           <span>{micError}</span>
         </div>
       )}
 
-      {/* Visualizer Canvas & Status Box */}
-      <div className="relative h-28 w-full rounded-2xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center overflow-hidden shadow-inner p-4">
-        {/* Canvas for real-time waveform */}
-        <canvas
-          ref={canvasRef}
-          width={420}
-          height={80}
-          className={`w-full h-full transition-opacity duration-300 ${isRecording ? 'opacity-90' : 'opacity-20'}`}
-        />
-
-        {/* Center Overlay info */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          {isRecording ? (
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping" />
-                <span className="font-mono text-sm font-bold tracking-wider">
-                  {formatTimer(recordingSeconds)}
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-medium tracking-wide">
-                {t('recording_active')}
-              </span>
+      {!isRecording ? (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/70">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="w-9 h-9 rounded-xl bg-white border border-neutral-200/80 shadow-2xs flex items-center justify-center text-neutral-800 flex-shrink-0">
+              <Mic className="w-4 h-4 text-neutral-800" />
             </div>
-          ) : (
-            <div className="text-center text-slate-400 text-xs font-medium space-y-1">
-              <div className="flex items-center justify-center gap-1.5 text-slate-300">
-                <Mic className="w-4 h-4 text-indigo-400" />
-                <span>Mikrofon Siap</span>
-              </div>
-              <p className="text-[11px] text-slate-500">
-                Klik tombol di bawah dan baca kalimat dengan intonasi spontan/santai
+            <div>
+              <p className="text-sm font-semibold text-neutral-900 leading-none">
+                {hasRecorded ? 'Audio Siap Ditranskripsi' : 'Mikrofon Siap'}
+              </p>
+              <p className="text-xs text-neutral-400 mt-1">
+                {hasRecorded
+                  ? 'Putar rekaman di bawah atau rekam ulang jika perlu'
+                  : 'Klik tombol rekam lalu ucapkan kalimat di atas'}
               </p>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Recording Control Buttons */}
-      <div className="flex items-center justify-center gap-3">
-        {!isRecording ? (
-          <button
+          <Button
             type="button"
             onClick={startRecording}
             disabled={isProcessing}
-            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 hover:shadow-indigo-300 disabled:opacity-50 transition-all cursor-pointer"
+            size="default"
+            className="w-full sm:w-auto h-10 px-5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 font-medium text-xs sm:text-sm shadow-xs gap-2 flex-shrink-0 cursor-pointer"
           >
-            <Mic className="w-4 h-4" />
-            <span>{hasRecorded ? t('re_record') : t('record_btn')}</span>
-          </button>
-        ) : (
-          <button
+            {hasRecorded ? (
+              <>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{t('re_record')}</span>
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span>{t('record_btn')}</span>
+              </>
+            )}
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 sm:p-4 rounded-2xl bg-red-50/40 border border-red-200/80">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-red-200 text-red-600 text-xs font-mono font-medium shadow-2xs flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span>{formatTimer(recordingSeconds)}</span>
+            </div>
+            <canvas
+              ref={canvasRef}
+              width={240}
+              height={32}
+              className="h-8 w-36 sm:w-56"
+            />
+          </div>
+
+          <Button
             type="button"
             onClick={stopRecording}
-            className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-sm text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-200 animate-pulse transition-all cursor-pointer"
+            variant="destructive"
+            className="w-full sm:w-auto h-10 px-5 rounded-xl font-medium text-xs sm:text-sm gap-2 shadow-xs flex-shrink-0 cursor-pointer"
           >
-            <Square className="w-4 h-4 fill-white" />
+            <Square className="w-3.5 h-3.5 fill-current" />
             <span>{t('stop_btn')} ({formatTimer(recordingSeconds)})</span>
-          </button>
-        )}
-
-        {hasRecorded && !isRecording && (
-          <button
-            type="button"
-            onClick={startRecording}
-            disabled={isProcessing}
-            className="p-3 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
-            title="Rekam Ulang Suara"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { BENCHMARK_PROMPTS } from '../../services/simulation';
 import { LanguageProvider } from '../../i18n/LanguageContext';
 
 describe('PromptTeleprompter integration', () => {
-  it('renders current prompt text, prompter index, and target category', () => {
+  it('renders current prompt text, prompter index, target category, and only acak kalimat button', () => {
     const prompt = BENCHMARK_PROMPTS[0];
     const onSelectPrompt = vi.fn();
     const onChangeGroundTruth = vi.fn();
@@ -24,9 +24,16 @@ describe('PromptTeleprompter integration', () => {
     expect(screen.getByText(/Prompt #1 \/ 5/i)).toBeInTheDocument();
     expect(screen.getByText(`"${prompt.text}"`)).toBeInTheDocument();
     expect(screen.getByText(prompt.category)).toBeInTheDocument();
+
+    // Verify Acak Kalimat button exists
+    expect(screen.getByRole('button', { name: /Acak Kalimat/i })).toBeInTheDocument();
+
+    // Verify next and edit buttons are removed
+    expect(screen.queryByRole('button', { name: /Kalimat Berikutnya/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Edit Teks Referensi/i })).not.toBeInTheDocument();
   });
 
-  it('cycles to next prompt when "Kalimat Berikutnya" is clicked', () => {
+  it('randomizes prompt when "Acak Kalimat" is clicked', () => {
     const prompt = BENCHMARK_PROMPTS[0];
     const onSelectPrompt = vi.fn();
     const onChangeGroundTruth = vi.fn();
@@ -42,43 +49,12 @@ describe('PromptTeleprompter integration', () => {
       </LanguageProvider>
     );
 
-    const nextBtn = screen.getByText(/Kalimat Berikutnya/i);
-    fireEvent.click(nextBtn);
+    const randomizeBtn = screen.getByRole('button', { name: /Acak Kalimat/i });
+    fireEvent.click(randomizeBtn);
 
-    expect(onSelectPrompt).toHaveBeenCalledWith(BENCHMARK_PROMPTS[1]);
-  });
-
-  it('allows user to edit reference text and saves changes', () => {
-    const prompt = BENCHMARK_PROMPTS[0];
-    const onSelectPrompt = vi.fn();
-    const onChangeGroundTruth = vi.fn();
-
-    render(
-      <LanguageProvider>
-        <PromptTeleprompter
-          currentPrompt={prompt}
-          groundTruth={prompt.text}
-          onSelectPrompt={onSelectPrompt}
-          onChangeGroundTruth={onChangeGroundTruth}
-        />
-      </LanguageProvider>
-    );
-
-    // Click edit toggle
-    const editToggle = screen.getByText(/Edit Teks Referensi/i);
-    fireEvent.click(editToggle);
-
-    // Textarea should now be visible
-    const textarea = screen.getByPlaceholderText(/Ketik atau tempel teks referensi/i);
-    expect(textarea).toBeInTheDocument();
-
-    // Type new text
-    fireEvent.change(textarea, { target: { value: 'Kalimat acuan kustom baru untuk pengujian' } });
-
-    // Click save
-    const saveBtn = screen.getByText(/Simpan Perubahan/i);
-    fireEvent.click(saveBtn);
-
-    expect(onChangeGroundTruth).toHaveBeenCalledWith('Kalimat acuan kustom baru untuk pengujian');
+    expect(onSelectPrompt).toHaveBeenCalledTimes(1);
+    const selectedPrompt = onSelectPrompt.mock.calls[0][0];
+    expect(selectedPrompt.id).not.toBe(prompt.id);
+    expect(onChangeGroundTruth).toHaveBeenCalledWith(selectedPrompt.text);
   });
 });

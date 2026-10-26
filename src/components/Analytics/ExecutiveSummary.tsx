@@ -1,6 +1,8 @@
 import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { TrendingDown, Sparkles, Award } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { TrendingDown, ArrowUpRight } from 'lucide-react';
 
 interface ExecutiveSummaryProps {
   werReductionAbs: number;
@@ -25,104 +27,94 @@ export const ExecutiveSummary: React.FC<ExecutiveSummaryProps> = ({
 
   if (isBenchmark) {
     return (
-      <div className="rounded-2xl p-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-700 text-white shadow-lg relative overflow-hidden mb-6">
-        {/* Subtle background decoration */}
-        <div className="absolute right-0 top-0 bottom-0 opacity-10 flex items-center pr-8 pointer-events-none">
-          <Award className="w-48 h-48" />
-        </div>
-
-        <div className="relative z-10 space-y-4">
+      <Card className="rounded-3xl border-neutral-200/90 shadow-sm overflow-hidden">
+        <CardHeader className="border-b border-neutral-100 p-5 sm:p-6 pb-4">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-white/20 backdrop-blur-xs">
-              <Sparkles className="w-4 h-4 text-emerald-200" />
-            </span>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">
+            <Badge variant="outline" className="text-xs font-normal text-neutral-500 bg-white border-neutral-200">
               Kesimpulan Hasil Penelitian Tesis
-            </span>
+            </Badge>
           </div>
-
-          <p className="text-lg sm:text-xl font-bold leading-relaxed max-w-3xl">
+          <CardTitle className="text-base sm:text-lg pt-1 text-neutral-900 leading-snug">
             {t('summary_banner_benchmark', {
               werGain: `${werReductionAbs}% (Reduksi relatif ${werReductionPct}%)`,
             })}
-          </p>
+          </CardTitle>
+        </CardHeader>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
-              <span className="text-[11px] text-emerald-200 block font-medium">
+        <CardContent className="p-5 sm:p-6 pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
+              <span className="text-[11px] text-neutral-400 block font-mono uppercase tracking-wider">
                 Reduksi Mutlak WER
               </span>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <TrendingDown className="w-4 h-4 text-emerald-300" />
-                <span className="font-mono text-xl font-bold">
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <TrendingDown className="w-4 h-4 text-emerald-600" />
+                <span className="font-mono text-2xl font-bold text-emerald-600">
                   {werReductionAbs}%
                 </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
-              <span className="text-[11px] text-emerald-200 block font-medium">
+            <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
+              <span className="text-[11px] text-neutral-400 block font-mono uppercase tracking-wider">
                 Reduksi Mutlak CER
               </span>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <TrendingDown className="w-4 h-4 text-emerald-300" />
-                <span className="font-mono text-xl font-bold">
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <TrendingDown className="w-4 h-4 text-emerald-600" />
+                <span className="font-mono text-2xl font-bold text-emerald-600">
                   {cerReductionAbs}%
                 </span>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 col-span-2 sm:col-span-1">
-              <span className="text-[11px] text-emerald-200 block font-medium">
+            <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
+              <span className="text-[11px] text-neutral-400 block font-mono uppercase tracking-wider">
                 Peningkatan Keyakinan Model
               </span>
-              <div className="flex items-baseline gap-1 mt-0.5">
-                <span className="font-mono text-xl font-bold">
+              <div className="flex items-baseline gap-1.5 mt-1.5">
+                <ArrowUpRight className="w-4 h-4 text-neutral-700" />
+                <span className="font-mono text-2xl font-bold text-neutral-900">
                   +{(loraConfidence - baseConfidence).toFixed(1)}%
                 </span>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   // Free-form mode banner
   return (
-    <div className="rounded-2xl p-6 bg-gradient-to-r from-indigo-700 via-indigo-600 to-purple-700 text-white shadow-lg relative overflow-hidden mb-6">
-      <div className="relative z-10 space-y-4">
-        <div className="flex items-center gap-2">
-          <span className="p-1 rounded-md bg-white/20 backdrop-blur-xs">
-            <Sparkles className="w-4 h-4 text-indigo-200" />
-          </span>
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-200">
-            Hasil Deteksi Mode Bebas
-          </span>
-        </div>
-
-        <p className="text-lg sm:text-xl font-bold leading-relaxed max-w-3xl">
-          {t('summary_banner_freeform', {
-            count: spontaneousCount,
-            confidence: loraConfidence,
-          })}
-        </p>
-
-        <div className="flex flex-wrap gap-4 pt-1">
-          <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
-            <span className="text-[11px] text-indigo-200 block">Partikel Spontan</span>
-            <span className="font-mono text-xl font-bold">{spontaneousCount} kata</span>
+    <Card className="rounded-3xl border-neutral-200/90 shadow-sm overflow-hidden">
+      <CardHeader className="border-b border-neutral-100 p-5 sm:p-6 pb-4">
+        <Badge variant="outline" className="text-xs font-normal text-neutral-500 bg-white border-neutral-200 w-fit">
+          Kesimpulan Hasil Pengujian Bebas
+        </Badge>
+        <CardTitle className="text-base sm:text-lg pt-1 text-neutral-900 leading-snug">
+          {t('summary_banner_freeform', { count: spontaneousCount })}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-5 sm:p-6 pt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
+            <span className="text-[11px] text-neutral-400 block font-mono uppercase tracking-wider">
+              Partikel Spontan Terdeteksi
+            </span>
+            <span className="font-mono text-2xl font-bold text-neutral-900 mt-1.5 block">
+              {spontaneousCount} kata
+            </span>
           </div>
-          <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
-            <span className="text-[11px] text-indigo-200 block">Keyakinan LoRA</span>
-            <span className="font-mono text-xl font-bold">{loraConfidence}%</span>
-          </div>
-          <div className="px-3.5 py-2 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15">
-            <span className="text-[11px] text-indigo-200 block">Keyakinan Base</span>
-            <span className="font-mono text-xl font-bold">{baseConfidence}%</span>
+          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
+            <span className="text-[11px] text-neutral-400 block font-mono uppercase tracking-wider">
+              Selisih Keyakinan (LoRA vs Base)
+            </span>
+            <span className="font-mono text-2xl font-bold text-neutral-900 mt-1.5 block">
+              +{(loraConfidence - baseConfidence).toFixed(1)}%
+            </span>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };

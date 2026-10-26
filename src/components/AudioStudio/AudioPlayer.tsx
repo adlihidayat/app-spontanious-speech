@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { Button } from '../ui/button';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -74,7 +75,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="p-3.5 rounded-xl bg-slate-900 text-white shadow-xs space-y-2 border border-slate-800">
+    <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/80 space-y-3">
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -84,9 +85,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
         preload="metadata"
       />
 
-      <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+      <div className="flex items-center justify-between text-xs text-neutral-500 font-medium">
         <span>{t('audio_preview_title')}</span>
-        <span className="font-mono text-slate-300">
+        <span className="font-mono text-neutral-700">
           {formatTime(currentTime)} / {formatTime(duration)}
         </span>
       </div>
@@ -99,49 +100,58 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ audioUrl }) => {
           max={duration || 100}
           value={currentTime}
           onChange={handleSeek}
-          className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 group-hover:h-2 transition-all"
+          className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-neutral-900"
         />
         <div
-          className="absolute left-0 top-0 bottom-0 bg-indigo-500 rounded-lg pointer-events-none"
+          className="absolute left-0 top-0 bottom-0 bg-neutral-900 rounded-lg pointer-events-none"
           style={{ width: `${progressPercent}%` }}
         />
       </div>
 
       {/* Controls */}
       <div className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-2">
-          <button
+        <div className="flex items-center gap-1.5">
+          <Button
             type="button"
+            size="icon"
             onClick={togglePlay}
-            className="p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white transition-colors cursor-pointer"
+            className="h-8 w-8 rounded-full bg-neutral-900 text-white hover:bg-neutral-800 shadow-sm"
             title={isPlaying ? 'Pause' : 'Play'}
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5 fill-white" /> : <Play className="w-3.5 h-3.5 fill-white ml-0.5" />}
-          </button>
+            {isPlaying ? (
+              <Pause className="w-3.5 h-3.5 fill-current" />
+            ) : (
+              <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+            )}
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => {
               if (audioRef.current) {
                 audioRef.current.currentTime = 0;
                 setCurrentTime(0);
               }
             }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors"
-            title="Ulangi dari awal"
+            className="h-8 w-8 text-neutral-500 hover:text-neutral-900 rounded-lg"
+            title="Ulangi"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-          </button>
+          </Button>
         </div>
 
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           onClick={toggleMute}
-          className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors"
+          className="h-8 w-8 text-neutral-500 hover:text-neutral-900 rounded-lg"
           title={isMuted ? 'Unmute' : 'Mute'}
         >
           {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-        </button>
+        </Button>
       </div>
     </div>
   );

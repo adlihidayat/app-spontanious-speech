@@ -22,8 +22,8 @@ export const AnalyticsPanel: React.FC<AnalyticsPanelProps> = ({
 
   return (
     <div className="space-y-6 pt-2">
-      <div className="flex items-center justify-between pb-2">
-        <h2 className="text-xl font-bold tracking-tight text-slate-900">
+      <div className="flex items-center justify-between pb-1">
+        <h2 className="text-base sm:text-lg font-semibold tracking-tight text-neutral-900">
           {t('summary_title')}
         </h2>
       </div>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { AppMode, PromptItem, TranscribeResponse, ApiConfig, DiffWord } from './types';
 import { BENCHMARK_PROMPTS } from './services/simulation';
 import { getStoredApiConfig, transcribeAudio } from './services/api';
@@ -10,10 +10,8 @@ import { ModeSwitcher } from './components/ModeSwitcher';
 import { AudioStudio } from './components/AudioStudio/AudioStudio';
 import { ComparisonArena } from './components/ComparisonArena/ComparisonArena';
 import { AnalyticsPanel } from './components/Analytics/AnalyticsPanel';
-import { BookOpen, Github, Cpu } from 'lucide-react';
 
 export function App() {
-
   // Mode state
   const [mode, setMode] = useState<AppMode>('benchmark');
 
@@ -109,13 +107,11 @@ export function App() {
     }
   };
 
-  // Optional: Auto-populate initial demo simulation if desired for instant thesis presentation
-  useEffect(() => {
-    // Keep initially ready for quick preview
-  }, []);
-
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900 font-sans">
+    <div className="min-h-screen flex flex-col bg-white text-neutral-900 antialiased relative">
+      {/* Subtle top dot pattern from reference design */}
+      <div className="absolute inset-x-0 top-0 h-96 bg-dot-pattern [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none -z-10 opacity-60" />
+
       {/* Header */}
       <Header
         apiConfig={apiConfig}
@@ -123,42 +119,12 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Research Banner Intro */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-slate-200/80 shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 flex-shrink-0">
-              <Cpu className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-700">
-                Arsitektur Model & Metode Evaluasi
-              </span>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Membandingkan <strong className="text-slate-900 font-mono">openai/whisper-small</strong> dengan parameter-efficient fine-tuning <strong className="text-slate-900 font-mono">LoRA (r=16, α=32)</strong> pada korpus ujaran santai Bahasa Indonesia.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            <a
-              href="https://github.com/adlihidayat/app-spontanious-speech"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-colors border border-slate-200"
-            >
-              <Github className="w-3.5 h-3.5" />
-              <span>GitHub Repository</span>
-            </a>
-          </div>
-        </div>
-
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
         {/* Dual Mode Switcher */}
         <ModeSwitcher
           currentMode={mode}
           onSelectMode={(newMode) => {
             setMode(newMode);
-            // reset or adapt response if needed
           }}
         />
 
@@ -182,15 +148,10 @@ export function App() {
         />
 
         {/* Side-by-Side Comparison Arena */}
-        <div className="space-y-4">
+        <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-              <span>Hasil Komparasi Transkripsi</span>
-              {response && (
-                <span className="text-xs font-normal text-slate-500 font-mono">
-                  ({response.mode === 'benchmark' ? 'Mode Evaluasi' : 'Mode Bebas'})
-                </span>
-              )}
+            <h2 className="text-base sm:text-lg font-semibold tracking-tight text-neutral-900">
+              Hasil Komparasi Transkripsi
             </h2>
           </div>
 
@@ -223,15 +184,11 @@ export function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
-          <div className="flex items-center justify-center gap-2 font-medium text-slate-600">
-            <BookOpen className="w-4 h-4 text-indigo-600" />
-            <span>Platform Evaluasi Tesis: Pengenalan Ujaran Spontan Bahasa Indonesia (PEFT-LoRA)</span>
-          </div>
-          <p className="text-[11px] text-slate-400">
-            Dikembangkan untuk demonstrasi sidang tesis komparasi performa model Whisper-Small Base vs. Usulan LoRA.
+      {/* Minimal Academic Footer */}
+      <footer className="mt-auto border-t border-neutral-100 py-6 text-center text-xs text-neutral-400">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <p>
+            Platform Evaluasi Tesis: Pengenalan Ujaran Spontan Bahasa Indonesia (PEFT-LoRA)
           </p>
         </div>
       </footer>

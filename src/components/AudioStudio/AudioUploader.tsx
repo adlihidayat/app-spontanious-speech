@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { UploadCloud, FileAudio, CheckCircle, AlertCircle, X } from 'lucide-react';
+import { UploadCloud, FileAudio, AlertCircle, X } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface AudioUploaderProps {
   onAudioReady: (file: File, audioUrl: string) => void;
@@ -69,9 +70,9 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {errorMessage && (
-        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+        <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{errorMessage}</span>
         </div>
@@ -83,10 +84,10 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`h-40 rounded-2xl border-2 border-dashed p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
+          className={`py-6 px-4 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center cursor-pointer transition-all ${
             isDragging
-              ? 'border-indigo-500 bg-indigo-50/50 scale-[0.99]'
-              : 'border-slate-300 hover:border-indigo-400 hover:bg-slate-50/80 bg-white'
+              ? 'border-neutral-900 bg-neutral-100/70'
+              : 'border-neutral-200/90 hover:border-neutral-400 bg-neutral-50/50 hover:bg-neutral-50'
           }`}
         >
           <input
@@ -98,44 +99,42 @@ export const AudioUploader: React.FC<AudioUploaderProps> = ({
             className="hidden"
           />
 
-          <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600 mb-2.5">
-            <UploadCloud className="w-6 h-6" />
+          <div className="h-9 w-9 rounded-xl bg-white border border-neutral-200/80 flex items-center justify-center text-neutral-600 mb-2 shadow-2xs">
+            <UploadCloud className="w-4 h-4 text-neutral-700" />
           </div>
-          <span className="text-xs font-semibold text-slate-800 mb-1">
+          <p className="text-xs sm:text-sm font-semibold text-neutral-800">
             {t('upload_drag_hint')}
-          </span>
-          <span className="text-[11px] text-slate-500 font-mono">
+          </p>
+          <p className="text-[11px] text-neutral-400 mt-1 font-mono">
             {t('upload_limit_hint')}
-          </span>
+          </p>
         </div>
       ) : (
-        <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 flex items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl border border-neutral-200/90 bg-neutral-50/70 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="p-2.5 rounded-lg bg-emerald-600 text-white flex-shrink-0">
-              <FileAudio className="w-5 h-5" />
+            <div className="h-10 w-10 rounded-xl bg-white border border-neutral-200/80 flex items-center justify-center text-neutral-600 flex-shrink-0">
+              <FileAudio className="w-5 h-5 text-neutral-600" />
             </div>
-            <div className="overflow-hidden">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                <span className="font-semibold text-xs text-slate-900 truncate">
-                  {selectedFile.name}
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-500 font-mono">
+            <div className="truncate">
+              <p className="text-sm font-semibold text-neutral-900 truncate">
+                {selectedFile.name}
+              </p>
+              <p className="text-xs text-neutral-400 font-mono">
                 {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-              </span>
+              </p>
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleClear}
             disabled={isProcessing}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition-colors flex-shrink-0"
-            title="Hapus file ini"
+            className="h-8 w-8 rounded-lg text-neutral-400 hover:text-neutral-700"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
       )}
     </div>

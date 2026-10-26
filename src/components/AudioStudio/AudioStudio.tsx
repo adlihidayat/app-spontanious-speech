@@ -5,7 +5,10 @@ import { PromptTeleprompter } from './PromptTeleprompter';
 import { AudioRecorder } from './AudioRecorder';
 import { AudioUploader } from './AudioUploader';
 import { AudioPlayer } from './AudioPlayer';
-import { Mic, UploadCloud, Play, Loader2, Sparkles, HelpCircle } from 'lucide-react';
+import { Card, CardContent } from '../ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { Button } from '../ui/button';
+import { Mic, UploadCloud, Loader2, ArrowRight } from 'lucide-react';
 
 interface AudioStudioProps {
   mode: AppMode;
@@ -40,124 +43,93 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 md:p-6 mb-8">
-      {/* If Benchmark Mode, show Prompt Teleprompter */}
-      {mode === 'benchmark' && (
-        <PromptTeleprompter
-          currentPrompt={currentPrompt}
-          groundTruth={groundTruth}
-          onSelectPrompt={onSelectPrompt}
-          onChangeGroundTruth={onChangeGroundTruth}
-        />
-      )}
-
-      {/* Free-form Mode Helper Banner */}
-      {mode === 'freeform' && (
-        <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-50/70 to-blue-50/50 border border-indigo-100 flex items-start gap-3 mb-5">
-          <HelpCircle className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-          <div className="text-xs space-y-1">
-            <span className="font-bold text-indigo-950">
+    <Card className="rounded-3xl border-neutral-200/90 shadow-sm overflow-hidden bg-white">
+      <CardContent className="p-6 sm:p-7 space-y-5">
+        {/* Sentence Reference Section (Benchmark Mode) */}
+        {mode === 'benchmark' ? (
+          <PromptTeleprompter
+            currentPrompt={currentPrompt}
+            groundTruth={groundTruth}
+            onSelectPrompt={onSelectPrompt}
+            onChangeGroundTruth={onChangeGroundTruth}
+          />
+        ) : (
+          <div className="space-y-1 py-1">
+            <h3 className="text-base font-semibold tracking-tight text-neutral-900">
               Mode Bebas: Uji Suara Langsung Tanpa Teks Referensi
-            </span>
-            <p className="text-slate-600 leading-relaxed">
-              Anda dapat berbicara apa saja (atau mengunggah audio percakapan santai apa pun). Sistem akan secara otomatis membandingkan transkripsi kedua model, menghitung tingkat keyakinan (confidence), mengukur latensi inferensi, dan menandai kosakata spontan Indonesia yang berhasil ditangkap.
+            </h3>
+            <p className="text-xs text-neutral-400">
+              Rekam atau unggah audio percakapan santai apa pun untuk menguji performa model secara langsung tanpa teks acuan.
             </p>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Audio Source Tabs */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('mic')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'mic'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <Mic className="w-4 h-4" />
-            <span>{t('tab_mic')}</span>
-          </button>
+        {/* Subtle Hairline Divider between Reference and Audio Input */}
+        <div className="border-t border-neutral-100" />
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('upload')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'upload'
-                ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100'
-            }`}
-          >
-            <UploadCloud className="w-4 h-4" />
-            <span>{t('tab_file')}</span>
-          </button>
-        </div>
+        {/* Audio Input Tabs: Mic / Upload */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(val) => setActiveTab(val as 'mic' | 'upload')}
+          className="w-full space-y-3"
+        >
+          <div className="flex items-center justify-between">
+            <TabsList className="h-9 p-0.5 bg-neutral-100/90 rounded-xl border border-neutral-200/60 inline-flex">
+              <TabsTrigger value="mic" className="gap-2 text-xs rounded-lg px-3">
+                <Mic className="w-3.5 h-3.5" />
+                <span>{t('tab_mic')}</span>
+              </TabsTrigger>
+              <TabsTrigger value="upload" className="gap-2 text-xs rounded-lg px-3">
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>{t('tab_file')}</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-        {/* Tab Content */}
-        <div className="py-1">
-          {activeTab === 'mic' ? (
+          <TabsContent value="mic" className="mt-0">
             <AudioRecorder
               onAudioReady={handleAudioReady}
               isProcessing={isAnalyzing}
             />
-          ) : (
+          </TabsContent>
+
+          <TabsContent value="upload" className="mt-0">
             <AudioUploader
               onAudioReady={handleAudioReady}
               isProcessing={isAnalyzing}
             />
-          )}
-        </div>
+          </TabsContent>
+        </Tabs>
 
         {/* Audio Player Preview */}
         {audioSource && (
-          <div className="pt-2 animate-in fade-in duration-200">
+          <div>
             <AudioPlayer audioUrl={audioSource.url} />
           </div>
         )}
 
-        {/* Main Compare Action Button */}
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
-          <div className="text-xs text-slate-500">
-            {audioSource ? (
-              <span className="text-emerald-700 font-medium inline-flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                Audio siap dianalisis
-              </span>
-            ) : (
-              <span className="text-slate-400">
-                {t('audio_required_alert')}
-              </span>
-            )}
-          </div>
-
-          <button
+        {/* Transcribe Action Button */}
+        <div className="pt-2">
+          <Button
             type="button"
             onClick={handleAnalyzeClick}
             disabled={!audioSource || isAnalyzing}
-            className={`w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-3 rounded-xl font-bold text-sm transition-all shadow-md ${
-              audioSource && !isAnalyzing
-                ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white shadow-indigo-200 hover:shadow-indigo-300 cursor-pointer scale-100 hover:scale-[1.01]'
-                : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
-            }`}
+            className="w-full h-11 sm:h-12 gap-2 bg-neutral-900 text-white hover:bg-neutral-800 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:border disabled:border-neutral-200/80 rounded-xl text-sm font-semibold shadow-xs transition-all cursor-pointer"
           >
             {isAnalyzing ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
+                <Loader2 className="w-4 h-4 animate-spin" />
                 <span>{t('analyzing_btn')}</span>
               </>
             ) : (
               <>
-                <Play className="w-4 h-4 fill-white" />
-                <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
                 <span>{t('analyze_btn')}</span>
+                <ArrowRight className="w-4 h-4" />
               </>
             )}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
