@@ -28,12 +28,13 @@ export const ComparisonArena: React.FC<ComparisonArenaProps> = ({
 }) => {
   const { t } = useLanguage();
   const [isWerDetailOpen, setIsWerDetailOpen] = useState(false);
+  const [isMetricsExpanded, setIsMetricsExpanded] = useState(false);
 
   return (
     <>
-      <Card className="rounded-3xl border-none overflow-hidden p-0">
+      <Card className=" border-none bg-transparent shadow-none">
         {/* Card Header with h2, p, and right-aligned Legend Badges */}
-        <CardHeader className="p-5 sm:p-6 pb-4 sm:pb-2 space-y-0">
+        <CardHeader className="p-0 pb-3 space-y-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-medium tracking-tight text-neutral-900">
@@ -47,7 +48,7 @@ export const ComparisonArena: React.FC<ComparisonArenaProps> = ({
         </CardHeader>
 
         {/* Card Content: Comparison Columns inside 1 Card */}
-        <CardContent className="p-5 sm:p-6 pt-4 sm:pt-4">
+        <CardContent className="p-0">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch">
             {/* Baseline Model Column */}
             <ModelCard
@@ -58,6 +59,8 @@ export const ComparisonArena: React.FC<ComparisonArenaProps> = ({
               mode={mode}
               diffWords={baseDiffWords}
               audioDuration={audioDuration}
+              isExpanded={isMetricsExpanded}
+              onToggleExpand={() => setIsMetricsExpanded((prev) => !prev)}
               onOpenWerDetail={
                 mode === "benchmark"
                   ? () => setIsWerDetailOpen(true)
@@ -77,6 +80,8 @@ export const ComparisonArena: React.FC<ComparisonArenaProps> = ({
               cerDelta={cerReductionAbs}
               baselineResult={baseResult}
               audioDuration={audioDuration}
+              isExpanded={isMetricsExpanded}
+              onToggleExpand={() => setIsMetricsExpanded((prev) => !prev)}
               onOpenWerDetail={
                 mode === "benchmark"
                   ? () => setIsWerDetailOpen(true)

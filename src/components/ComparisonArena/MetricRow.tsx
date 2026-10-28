@@ -24,7 +24,7 @@ export const MetricRow: React.FC<MetricRowProps> = ({
         <div className=" rounded-lg  flex items-center justify-center flex-shrink-0">
           {icon}
         </div>
-        <span className="text-xs sm:text-sm font-medium">{label}</span>
+        <span className="text-xs sm:text-xs font-medium">{label}</span>
         {badge}
         {infoAction && (
           <button
@@ -32,13 +32,13 @@ export const MetricRow: React.FC<MetricRowProps> = ({
             onClick={infoAction.onClick}
             title={infoAction.title}
             aria-label={infoAction.title || "Detail"}
-            className="inline-flex items-center justify-center w-5 h-5 rounded-md border border-neutral-200/90 bg-white hover:bg-neutral-100 text-neutral-500 hover:text-neutral-900 cursor-pointer transition-colors text-[11px] font-bold shadow-2xs ml-0.5"
+            className="inline-flex items-center justify-center w-4 h-4 rounded-full hover:bg-neutral-200 hover:text-neutral-800 text-neutral-500 border border-neutral-500 cursor-pointer transition-colors text-[10px] font-bold shadow-2xs ml-0.5"
           >
             !
           </button>
         )}
       </div>
-      <div className="font-mono text-sm font-medium flex-shrink-0 ml-3">
+      <div className="font-mono text-xs font-medium flex-shrink-0 ml-3">
         {score}
       </div>
     </div>

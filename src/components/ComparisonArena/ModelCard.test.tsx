@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ModelCard } from './ModelCard';
 import { LanguageProvider } from '../../i18n/LanguageContext';
 import { DiffWord, ModelResult } from '../../types';
@@ -25,7 +25,7 @@ describe('ModelCard component', () => {
     { word: 'makan', type: 'hit' },
   ];
 
-  it('renders Baseline model details and error metrics correctly in benchmark mode', () => {
+  it('renders Baseline model details and toggles error metrics expansion', () => {
     render(
       <LanguageProvider>
         <ModelCard
@@ -40,14 +40,25 @@ describe('ModelCard component', () => {
     );
 
     expect(screen.getByText('Baseline: OpenAI Whisper-Small')).toBeInTheDocument();
+    expect(screen.getByText('sudah')).toBeInTheDocument();
+
+    // Initially collapsed: shows toggle button, metrics not yet rendered
+    expect(screen.getByText('Rincian Metrik')).toBeInTheDocument();
+    expect(screen.getByText('Lihat Semua')).toBeInTheDocument();
+    expect(screen.queryByText('33.33%')).toBeNull();
+
+    // Click to expand
+    fireEvent.click(screen.getByRole('button', { name: /Rincian Metrik/i }));
+
+    // Now metrics are visible
     expect(screen.getByText('33.33%')).toBeInTheDocument(); // WER
     expect(screen.getByText('15%')).toBeInTheDocument(); // CER
     expect(screen.getByText('81.4%')).toBeInTheDocument(); // Confidence
     expect(screen.getByText('2.34s')).toBeInTheDocument(); // Latency
-    expect(screen.getByText('sudah')).toBeInTheDocument();
+    expect(screen.getByText('Tutup')).toBeInTheDocument();
   });
 
-  it('renders LoRA model with accuracy improvement delta in benchmark mode', () => {
+  it('renders LoRA model with accuracy improvement delta when expanded', () => {
     const mockLoraResult: ModelResult = {
       text: 'aku udah makan',
       confidence: 95.8,
@@ -78,6 +89,7 @@ describe('ModelCard component', () => {
           mode="benchmark"
           diffWords={loraDiffs}
           werDelta={33.33}
+          isExpanded={true}
         />
       </LanguageProvider>
     );
@@ -88,7 +100,7 @@ describe('ModelCard component', () => {
     expect(screen.getByText('95.8%')).toBeInTheDocument(); // Confidence
   });
 
-  it('renders all 5 required metrics in freeform mode without informal trait collision', () => {
+  it('renders all 5 required metrics in freeform mode when expanded', () => {
     render(
       <LanguageProvider>
         <ModelCard
@@ -104,6 +116,7 @@ describe('ModelCard component', () => {
           mode="freeform"
           diffWords={[]}
           audioDuration={5.2}
+          isExpanded={true}
         />
       </LanguageProvider>
     );

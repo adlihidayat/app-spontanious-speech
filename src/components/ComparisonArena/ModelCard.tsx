@@ -3,11 +3,10 @@ import { useLanguage } from "../../i18n/LanguageContext";
 import { AppMode, DiffWord, ModelResult } from "../../types";
 import { Button } from "../ui/button";
 import { MetricRow } from "./MetricRow";
+import { MetricBadge } from "./MetricBadge";
 import {
   Copy,
   Check,
-  ArrowDown,
-  ArrowUp,
   Cpu,
   FileText,
   SpellCheck,
@@ -17,6 +16,9 @@ import {
   Zap,
   HardDrive,
   FileAudio,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
 } from "lucide-react";
 
 interface ModelCardProps {
@@ -30,6 +32,8 @@ interface ModelCardProps {
   cerDelta?: number;
   baselineResult?: ModelResult | null;
   audioDuration?: number;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
   onOpenWerDetail?: () => void;
 }
 
@@ -44,10 +48,24 @@ export const ModelCard: React.FC<ModelCardProps> = ({
   cerDelta,
   baselineResult,
   audioDuration,
+  isExpanded: propIsExpanded,
+  onToggleExpand,
   onOpenWerDetail,
 }) => {
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
+  const [internalExpanded, setInternalExpanded] = useState(false);
+
+  const isExpanded =
+    propIsExpanded !== undefined ? propIsExpanded : internalExpanded;
+
+  const handleToggle = () => {
+    if (onToggleExpand) {
+      onToggleExpand();
+    } else {
+      setInternalExpanded((prev) => !prev);
+    }
+  };
 
   const isLora = modelType === "lora";
 
@@ -100,19 +118,18 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             badge: result ? (
               isLora ? (
                 typeof werDelta === "number" && werDelta > 0 ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                    <ArrowDown className="w-3 h-3" />
+                  <MetricBadge variant="warning" arrow="down">
                     {werDelta}% {t("badge_wer_better")}
-                  </span>
+                  </MetricBadge>
                 ) : (
-                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  <MetricBadge variant="success">
                     {t("badge_optimal")}
-                  </span>
+                  </MetricBadge>
                 )
               ) : (
-                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                <MetricBadge variant="neutral">
                   {t("badge_baseline")}
-                </span>
+                </MetricBadge>
               )
             ) : null,
             infoAction: onOpenWerDetail
@@ -130,19 +147,18 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             badge: result ? (
               isLora ? (
                 cerDiff > 0 ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                    <ArrowDown className="w-3 h-3" />
+                  <MetricBadge variant="warning" arrow="down">
                     {cerDiff}% {t("badge_cer_better")}
-                  </span>
+                  </MetricBadge>
                 ) : (
-                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  <MetricBadge variant="success">
                     {t("badge_optimal")}
-                  </span>
+                  </MetricBadge>
                 )
               ) : (
-                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                <MetricBadge variant="neutral">
                   {t("badge_baseline")}
-                </span>
+                </MetricBadge>
               )
             ) : null,
           },
@@ -154,19 +170,18 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             badge: result ? (
               isLora ? (
                 confDiff > 0 ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                    <ArrowUp className="w-3 h-3" />+{confDiff}%{" "}
-                    {t("badge_conf_higher")}
-                  </span>
+                  <MetricBadge variant="success" arrow="up">
+                    +{confDiff}% {t("badge_conf_higher")}
+                  </MetricBadge>
                 ) : (
-                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  <MetricBadge variant="neutral">
                     {t("badge_optimal")}
-                  </span>
+                  </MetricBadge>
                 )
               ) : (
-                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                <MetricBadge variant="neutral">
                   {t("badge_baseline")}
-                </span>
+                </MetricBadge>
               )
             ) : null,
           },
@@ -178,19 +193,18 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             badge: result ? (
               isLora ? (
                 latDiff <= 0 ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                    <ArrowDown className="w-3 h-3" />
+                  <MetricBadge variant="success" arrow="down">
                     {Math.abs(latDiff)}s {t("badge_faster")}
-                  </span>
+                  </MetricBadge>
                 ) : (
-                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  <MetricBadge variant="neutral">
                     +{latDiff}s {t("badge_overhead")}
-                  </span>
+                  </MetricBadge>
                 )
               ) : (
-                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                <MetricBadge variant="neutral">
                   {t("badge_baseline")}
-                </span>
+                </MetricBadge>
               )
             ) : null,
           },
@@ -201,11 +215,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             icon: <FileAudio className="w-3.5 h-3.5" />,
             label: t("metric_total_audio_label"),
             score: result ? `${effectiveAudioDuration.toFixed(2)}s` : "—",
-            badge: (
-              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
-                16 kHz
-              </span>
-            ),
+            badge: <MetricBadge variant="neutral">16 kHz</MetricBadge>,
           },
           {
             id: "total_latency",
@@ -215,19 +225,18 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             badge: result ? (
               isLora ? (
                 latDiff <= 0 ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                    <ArrowDown className="w-3 h-3" />
+                  <MetricBadge variant="success" arrow="down">
                     {Math.abs(latDiff)}s {t("badge_faster")}
-                  </span>
+                  </MetricBadge>
                 ) : (
-                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  <MetricBadge variant="neutral">
                     +{latDiff}s {t("badge_overhead")}
-                  </span>
+                  </MetricBadge>
                 )
               ) : (
-                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                <MetricBadge variant="neutral">
                   {t("badge_baseline")}
-                </span>
+                </MetricBadge>
               )
             ) : null,
           },
@@ -237,15 +246,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({
             label: t("metric_rtf_label"),
             score: rtf !== null ? `${rtf}x` : "—",
             badge: result ? (
-              <span
-                className={`inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md ${
-                  isLora
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs"
-                    : "bg-neutral-100 text-neutral-600 border border-neutral-200/80"
-                }`}
-              >
+              <MetricBadge variant={isLora ? "success" : "neutral"}>
                 &lt; 1.0x Real-Time
-              </span>
+              </MetricBadge>
             ) : null,
           },
           {
@@ -260,9 +263,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                 ? `${result.peak_vram_mb} MB`
                 : "1,840 MB",
             badge: (
-              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+              <MetricBadge variant="neutral">
                 {isLora ? "+12 MB (+0.6%)" : "FP16"}
-              </span>
+              </MetricBadge>
             ),
           },
           {
@@ -277,14 +280,13 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                 ? `${result.checkpoint_size_mb} MB`
                 : "967 MB",
             badge: isLora ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
-                <ArrowDown className="w-3 h-3" />
+              <MetricBadge variant="success" arrow="down">
                 98.4% {t("badge_smaller")}
-              </span>
+              </MetricBadge>
             ) : (
-              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+              <MetricBadge variant="neutral">
                 {t("badge_full_weights")}
-              </span>
+              </MetricBadge>
             ),
           },
         ];
@@ -295,17 +297,20 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         isLora ? "" : "bg-white"
       }`}
     >
-      <div className="space-y-4  py-3 pb-4 rounded-2xl  ">
+      <div className="relative z-10 flex-1 flex flex-col space-y-2 py-4 rounded-2xl border border-neutral-200/70 bg-white shadow-none">
         {/* Header: Badge, Model Title & Copy Button */}
-        <div className="flex items-center justify-between gap-3  px-4 sm:px-5 pb-2">
-          <h3 className="text-sm text-neutral-900 tracking-tight">{title}</h3>
+        <div className="flex items-center justify-between gap-3 px-4 sm:px-5">
+          <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex space-x-2 items-center">
+            <Copy className="w-3.5 h-3.5 text-blue-500 fill-blue-500" />
+            <span>{title}</span>
+          </h3>
 
           {result && (
             <Button
               type="button"
               size="icon"
               onClick={handleCopy}
-              className="h-8 w-8 bg-neutral-50/100 rounded-xl hover:bg-neutral-200/50 text-neutral-500 hover:text-neutral-900 cursor-pointer transition-colors shadow-none"
+              className="h- w- bg-white rounded-xl hover:bg-neutral-200/50 text-neutral-500 hover:text-neutral-900 cursor-pointer transition-colors shadow-none"
               title={copied ? t("copied_success") : t("copy_transcript")}
               aria-label={t("copy_transcript")}
             >
@@ -319,7 +324,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         </div>
 
         {/* Transcript Body Area (Inside Grey Bubble) */}
-        <div className="min-h-[10px] text-sm sm:text-sm leading-relaxed text-neutral-700 flex flex-col justify-center px-4 sm:px-5">
+        <div className="flex-1 text-sm leading-relaxed text-neutral-500 flex flex-col justify-start px-4 sm:px-5">
           {result ? (
             <div className="flex flex-wrap items-center gap-1.5">
               {diffWords.length > 0
@@ -354,7 +359,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                         return (
                           <span
                             key={idx}
-                            className="inline-flex items-center px-1 py-0.25 rounded-lg bg-emerald-100/80 text-emerald-800 font-medium text-xs sm:text-sm"
+                            className="inline-flex items-center px-1 py-0.25 rounded-lg bg-green-100/80 text-green-800 font-medium text-xs sm:text-sm"
                           >
                             {item.word}
                           </span>
@@ -406,7 +411,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                 : result.text}
             </div>
           ) : (
-            <div className="text-center py-6 flex flex-col items-center justify-center">
+            <div className="text-center py-6 flex flex-col items-center justify-center flex-1">
               <FileText className="w-5 h-5 text-neutral-400/80 mb-2 stroke-[1.5]" />
               <p className="text-xs text-neutral-400 font-normal">
                 {t("waiting_transcription")}
@@ -416,18 +421,48 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         </div>
       </div>
 
-      {/* Scoring Rows List - mapped through MetricRow cleanly */}
-      <div className="pt-3 px-3 flex flex-col gap-y-1  bg-neutral-50/100">
-        {metricsList.map((m) => (
-          <MetricRow
-            key={m.id}
-            icon={m.icon}
-            label={m.label}
-            score={m.score}
-            badge={m.badge}
-            infoAction={m.infoAction}
-          />
-        ))}
+      {/* Scoring Rows List - mapped through MetricRow cleanly with Collapsible toggle */}
+      <div className="relative z-0 pt-6 pb-3 rounded-b-2xl px-3 flex flex-col bg-neutral-100/50 -translate-y-4">
+        {/* Toggle Button */}
+        <button
+          type="button"
+          onClick={handleToggle}
+          className={`w-full flex items-center justify-between text-xs text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer group ${
+            isExpanded
+              ? "pb-2 pt-0.5 px-1 border-b border-neutral-200/60 mb-1"
+              : "py-0.5 px-1"
+          }`}
+          aria-expanded={isExpanded}
+        >
+          <span className="font-medium flex items-center gap-1.5 text-neutral-600 group-hover:text-neutral-900">
+            <BarChart3 className="w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-700" />
+            {t("metrics_summary_label")}
+          </span>
+          <span className="inline-flex items-center gap-1 text-neutral-500 group-hover:text-neutral-700 font-medium">
+            <span>{isExpanded ? t("hide_metrics") : t("show_metrics")}</span>
+            {isExpanded ? (
+              <ChevronUp className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5" />
+            )}
+          </span>
+        </button>
+
+        {/* Collapsible Metric Rows */}
+        {isExpanded && (
+          <div className="flex flex-col gap-y-1 pt-1">
+            {metricsList.map((m) => (
+              <MetricRow
+                key={m.id}
+                icon={m.icon}
+                label={m.label}
+                score={m.score}
+                badge={m.badge}
+                infoAction={m.infoAction}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

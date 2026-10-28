@@ -135,7 +135,10 @@ export const translations = {
     badge_overhead: "overhead",
     badge_optimal: "Optimal",
     badge_smaller: "lebih kecil",
-    badge_full_weights: "Full Weights"
+    badge_full_weights: "Full Weights",
+    metrics_summary_label: "Rincian Metrik",
+    show_metrics: "Lihat Semua",
+    hide_metrics: "Tutup"
   },
 
   en: {
@@ -274,7 +277,10 @@ export const translations = {
     badge_overhead: "overhead",
     badge_optimal: "Optimal",
     badge_smaller: "smaller",
-    badge_full_weights: "Full Weights"
+    badge_full_weights: "Full Weights",
+    metrics_summary_label: "Metric Details",
+    show_metrics: "View All",
+    hide_metrics: "Collapse"
   }
 };
 
