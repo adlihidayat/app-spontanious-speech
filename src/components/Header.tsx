@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Left: Branding & Subtitle */}
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-black" />

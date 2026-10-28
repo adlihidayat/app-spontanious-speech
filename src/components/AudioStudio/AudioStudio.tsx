@@ -24,7 +24,7 @@ interface AudioStudioProps {
   groundTruth: string;
   onSelectPrompt: (prompt: PromptItem) => void;
   onChangeGroundTruth: (text: string) => void;
-  onRunComparison: (audio: Blob | File) => void;
+  onRunComparison: (audio: Blob | File, duration?: number) => void;
   isAnalyzing: boolean;
 }
 
@@ -45,6 +45,7 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
     url: string;
     name: string;
   } | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number | null>(null);
 
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -311,6 +312,9 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
       mediaRecorderRef.current.stop();
     }
     setIsRecording(false);
+    if (recordingSeconds > 0) {
+      setAudioDuration(recordingSeconds);
+    }
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
@@ -369,13 +373,14 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
 
   const handleClearAudio = () => {
     setAudioSource(null);
+    setAudioDuration(null);
     setErrorMessage(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleAnalyzeClick = () => {
     if (!audioSource || isAnalyzing || isRecording) return;
-    onRunComparison(audioSource.blob);
+    onRunComparison(audioSource.blob, audioDuration || undefined);
   };
 
   // Inline Player Helpers
@@ -449,6 +454,12 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
           ref={audioRef}
           src={audioSource?.url}
           onEnded={() => setIsPlaying(false)}
+          onLoadedMetadata={(e) => {
+            const dur = e.currentTarget.duration;
+            if (dur && isFinite(dur) && dur > 0) {
+              setAudioDuration(dur);
+            }
+          }}
           preload="metadata"
         />
 

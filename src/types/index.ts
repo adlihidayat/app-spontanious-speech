@@ -16,6 +16,10 @@ export interface ModelResult {
   confidence: number;
   latency_sec: number;
   metrics: ModelMetrics;
+  audio_duration_sec?: number;
+  rtf?: number;
+  peak_vram_mb?: number;
+  checkpoint_size_mb?: number;
 }
 
 export interface ComparisonSummary {

@@ -6,7 +6,11 @@ import {
   ApiConfig,
   DiffWord,
 } from "./types";
-import { BENCHMARK_PROMPTS } from "./services/simulation";
+import {
+  BENCHMARK_PROMPTS,
+  getPresetMockResponse,
+  getFreeformMockResponse,
+} from "./services/simulation";
 import { getStoredApiConfig, transcribeAudio } from "./services/api";
 import {
   computeWordAlignment,
@@ -19,7 +23,6 @@ import { ApiConfigModal } from "./components/ApiConfigModal";
 import { ModeSwitcher } from "./components/ModeSwitcher";
 import { AudioStudio } from "./components/AudioStudio/AudioStudio";
 import { ComparisonArena } from "./components/ComparisonArena/ComparisonArena";
-import { AnalyticsPanel } from "./components/Analytics/AnalyticsPanel";
 
 export function App() {
   // Mode state
@@ -41,12 +44,26 @@ export function App() {
 
   // Inference & Results
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [response, setResponse] = useState<TranscribeResponse | null>(null);
+  const [audioDuration, setAudioDuration] = useState<number>(5.4);
+  const [response, setResponse] = useState<TranscribeResponse | null>(() =>
+    getPresetMockResponse(1),
+  );
 
-  // When prompt changes, sync ground truth
+  // When prompt changes, sync ground truth & update mock response
   const handleSelectPrompt = (prompt: PromptItem) => {
     setCurrentPrompt(prompt);
     setGroundTruth(prompt.text);
+    const promptDurations: Record<number, number> = {
+      1: 5.4,
+      2: 4.8,
+      3: 6.2,
+      4: 5.6,
+      5: 6.0,
+    };
+    setAudioDuration(promptDurations[prompt.id] || 5.2);
+    if (mode === "benchmark") {
+      setResponse(getPresetMockResponse(prompt.id));
+    }
   };
 
   // Recalculate diffs & metrics instantly whenever groundTruth or response changes
@@ -125,8 +142,11 @@ export function App() {
   }, [response, groundTruth, mode]);
 
   // Handle run inference
-  const handleRunComparison = async (audio: Blob | File) => {
+  const handleRunComparison = async (audio: Blob | File, duration?: number) => {
     setIsAnalyzing(true);
+    if (duration && isFinite(duration) && duration > 0) {
+      setAudioDuration(duration);
+    }
     try {
       const gt = mode === "benchmark" ? groundTruth : "";
       const result = await transcribeAudio(
@@ -156,12 +176,19 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-8 space-y-8">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-8 space-y-8">
         {/* Dual Mode Switcher */}
         <ModeSwitcher
           currentMode={mode}
           onSelectMode={(newMode) => {
             setMode(newMode);
+            if (newMode === "freeform") {
+              setAudioDuration(5.2);
+              setResponse(getFreeformMockResponse());
+            } else {
+              setAudioDuration(5.4);
+              setResponse(getPresetMockResponse(currentPrompt.id));
+            }
           }}
         />
 
@@ -185,51 +212,27 @@ export function App() {
         />
 
         {/* Side-by-Side Comparison Arena */}
-        <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base sm:text-base font-semibold tracking-tight text-neutral-900">
-              Hasil Komparasi Transkripsi
-            </h2>
-          </div>
-
-          <ComparisonArena
-            mode={mode}
-            baseResult={computedState.baseResult}
-            loraResult={computedState.loraResult}
-            baseDiffWords={computedState.baseDiffs}
-            loraDiffWords={computedState.loraDiffs}
-            werReductionAbs={computedState.werReductionAbs}
-            cerReductionAbs={computedState.cerReductionAbs}
-          />
-        </div>
-
-        {/* Analytical Summary & Visual Metrics Panel */}
-        {response && (
-          <AnalyticsPanel
-            mode={mode}
-            response={{
-              ...response,
-              base_model: computedState.baseResult || response.base_model,
-              lora_model: computedState.loraResult || response.lora_model,
-              comparison: {
-                ...response.comparison,
-                wer_reduction_absolute: computedState.werReductionAbs,
-                cer_reduction_absolute: computedState.cerReductionAbs,
-              },
-            }}
-          />
-        )}
+        <ComparisonArena
+          mode={mode}
+          baseResult={computedState.baseResult}
+          loraResult={computedState.loraResult}
+          baseDiffWords={computedState.baseDiffs}
+          loraDiffWords={computedState.loraDiffs}
+          werReductionAbs={computedState.werReductionAbs}
+          cerReductionAbs={computedState.cerReductionAbs}
+          audioDuration={audioDuration}
+        />
       </main>
 
       {/* Minimal Academic Footer */}
       <footer className="mt-auto border-t border-neutral-100 py-6 text-xs text-neutral-400">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
             Platform Evaluasi Tesis: Pengenalan Ujaran Spontan Bahasa Indonesia
             (PEFT-LoRA)
           </p>
           <div className="flex items-center gap-4">
-            <p>Copyright wispr@2026</p>
+            <p>Copyright Dhiyaadli@2026</p>
             <button
               type="button"
               onClick={() => setIsSettingsOpen(true)}

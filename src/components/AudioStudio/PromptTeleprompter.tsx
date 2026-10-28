@@ -53,7 +53,7 @@ export const PromptTeleprompter: React.FC<PromptTeleprompterProps> = ({
           <h1 className="text-base font-medium tracking-tight text-neutral-900 leading-tight">
             {t("mode_eval_title")}
           </h1>
-          <span className="text-sm text-neutral-600 font-medium shadow-2xs">
+          <span className="text-sm text-neutral-600 shadow-2xs">
             {t("mode_eval_subtitle")}
           </span>
         </div>
@@ -63,8 +63,9 @@ export const PromptTeleprompter: React.FC<PromptTeleprompterProps> = ({
       <div className="rounded-2xl bg-neutral-50/60 border border-neutral-200/80">
         {/* Header row inside bubble: Prompt index and Case name */}
         <div className="flex items-center justify-between p-4 sm:p-5 py-1 sm:py-2 border-b border-neutral-200/80">
-          <span className="font-mono text-sm text-neutral-600 font-medium shadow-2xs">
-            {t("case_label")} {currentPrompt.id} : {getCategoryText(currentPrompt.id, currentPrompt.category)}
+          <span className="font-mono text-sm text-neutral-500 font-medium shadow-2xs">
+            {t("case_label")} {currentPrompt.id} :{" "}
+            {getCategoryText(currentPrompt.id, currentPrompt.category)}
           </span>
           <Button
             size="sm"

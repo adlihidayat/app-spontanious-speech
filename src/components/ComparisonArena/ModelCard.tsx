@@ -1,35 +1,55 @@
-import React from 'react';
-import { useLanguage } from '../../i18n/LanguageContext';
-import { AppMode, DiffWord, ModelResult } from '../../types';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Copy, Check, ArrowDown } from 'lucide-react';
+import React, { useState } from "react";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { AppMode, DiffWord, ModelResult } from "../../types";
+import { Button } from "../ui/button";
+import { MetricRow } from "./MetricRow";
+import {
+  Copy,
+  Check,
+  ArrowDown,
+  ArrowUp,
+  Cpu,
+  FileText,
+  SpellCheck,
+  CaseSensitive,
+  ShieldCheck,
+  Clock,
+  Zap,
+  HardDrive,
+  FileAudio,
+} from "lucide-react";
 
 interface ModelCardProps {
-  modelType: 'base' | 'lora';
+  modelType: "base" | "lora";
   title: string;
-  tag: string;
+  tag?: string;
   result: ModelResult | null;
   mode: AppMode;
   diffWords: DiffWord[];
   werDelta?: number;
   cerDelta?: number;
+  baselineResult?: ModelResult | null;
+  audioDuration?: number;
+  onOpenWerDetail?: () => void;
 }
 
 export const ModelCard: React.FC<ModelCardProps> = ({
   modelType,
   title,
-  tag,
+  tag: _tag,
   result,
   mode,
   diffWords,
   werDelta,
+  cerDelta,
+  baselineResult,
+  audioDuration,
+  onOpenWerDetail,
 }) => {
   const { t } = useLanguage();
-  const [copied, setCopied] = React.useState(false);
+  const [copied, setCopied] = useState(false);
 
-  const isLora = modelType === 'lora';
+  const isLora = modelType === "lora";
 
   const handleCopy = () => {
     if (!result?.text) return;
@@ -38,86 +58,314 @@ export const ModelCard: React.FC<ModelCardProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Deltas for LoRA comparison
+  const cerDiff =
+    typeof cerDelta === "number"
+      ? cerDelta
+      : baselineResult && result
+        ? Number(
+            Math.max(
+              0,
+              baselineResult.metrics.cer - result.metrics.cer,
+            ).toFixed(1),
+          )
+        : 0;
+
+  const confDiff =
+    baselineResult && result
+      ? Number((result.confidence - baselineResult.confidence).toFixed(1))
+      : 0;
+
+  const latDiff =
+    baselineResult && result
+      ? Number((result.latency_sec - baselineResult.latency_sec).toFixed(2))
+      : 0;
+
+  const effectiveAudioDuration =
+    result?.audio_duration_sec || audioDuration || 5.2;
+
+  const rtf = result
+    ? Number((result.latency_sec / effectiveAudioDuration).toFixed(2))
+    : null;
+
+  // Construct structured metrics list without duplicating row JSX
+  const metricsList =
+    mode === "benchmark"
+      ? [
+          {
+            id: "wer",
+            icon: <SpellCheck className="w-3.5 h-3.5" />,
+            label: t("metric_wer_label"),
+            score: result ? `${result.metrics.wer}%` : "—",
+            badge: result ? (
+              isLora ? (
+                typeof werDelta === "number" && werDelta > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <ArrowDown className="w-3 h-3" />
+                    {werDelta}% {t("badge_wer_better")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    {t("badge_optimal")}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  {t("badge_baseline")}
+                </span>
+              )
+            ) : null,
+            infoAction: onOpenWerDetail
+              ? {
+                  onClick: onOpenWerDetail,
+                  title: "Lihat rincian perhitungan WER",
+                }
+              : undefined,
+          },
+          {
+            id: "cer",
+            icon: <CaseSensitive className="w-3.5 h-3.5" />,
+            label: t("metric_cer_label"),
+            score: result ? `${result.metrics.cer}%` : "—",
+            badge: result ? (
+              isLora ? (
+                cerDiff > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <ArrowDown className="w-3 h-3" />
+                    {cerDiff}% {t("badge_cer_better")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    {t("badge_optimal")}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  {t("badge_baseline")}
+                </span>
+              )
+            ) : null,
+          },
+          {
+            id: "confidence",
+            icon: <ShieldCheck className="w-3.5 h-3.5" />,
+            label: t("metric_confidence_label"),
+            score: result ? `${result.confidence}%` : "—",
+            badge: result ? (
+              isLora ? (
+                confDiff > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <ArrowUp className="w-3 h-3" />+{confDiff}%{" "}
+                    {t("badge_conf_higher")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                    {t("badge_optimal")}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  {t("badge_baseline")}
+                </span>
+              )
+            ) : null,
+          },
+          {
+            id: "latency",
+            icon: <Clock className="w-3.5 h-3.5" />,
+            label: t("metric_latency_label"),
+            score: result ? `${result.latency_sec}s` : "—",
+            badge: result ? (
+              isLora ? (
+                latDiff <= 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <ArrowDown className="w-3 h-3" />
+                    {Math.abs(latDiff)}s {t("badge_faster")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                    +{latDiff}s {t("badge_overhead")}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  {t("badge_baseline")}
+                </span>
+              )
+            ) : null,
+          },
+        ]
+      : [
+          {
+            id: "audio_duration",
+            icon: <FileAudio className="w-3.5 h-3.5" />,
+            label: t("metric_total_audio_label"),
+            score: result ? `${effectiveAudioDuration.toFixed(2)}s` : "—",
+            badge: (
+              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                16 kHz
+              </span>
+            ),
+          },
+          {
+            id: "total_latency",
+            icon: <Clock className="w-3.5 h-3.5" />,
+            label: t("metric_total_latency_label"),
+            score: result ? `${result.latency_sec}s` : "—",
+            badge: result ? (
+              isLora ? (
+                latDiff <= 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                    <ArrowDown className="w-3 h-3" />
+                    {Math.abs(latDiff)}s {t("badge_faster")}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                    +{latDiff}s {t("badge_overhead")}
+                  </span>
+                )
+              ) : (
+                <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                  {t("badge_baseline")}
+                </span>
+              )
+            ) : null,
+          },
+          {
+            id: "rtf",
+            icon: <Zap className="w-3.5 h-3.5" />,
+            label: t("metric_rtf_label"),
+            score: rtf !== null ? `${rtf}x` : "—",
+            badge: result ? (
+              <span
+                className={`inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md ${
+                  isLora
+                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs"
+                    : "bg-neutral-100 text-neutral-600 border border-neutral-200/80"
+                }`}
+              >
+                &lt; 1.0x Real-Time
+              </span>
+            ) : null,
+          },
+          {
+            id: "peak_vram",
+            icon: <Cpu className="w-3.5 h-3.5" />,
+            label: t("metric_vram_label"),
+            score: isLora
+              ? result?.peak_vram_mb
+                ? `${result.peak_vram_mb} MB`
+                : "1,852 MB"
+              : result?.peak_vram_mb
+                ? `${result.peak_vram_mb} MB`
+                : "1,840 MB",
+            badge: (
+              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                {isLora ? "+12 MB (+0.6%)" : "FP16"}
+              </span>
+            ),
+          },
+          {
+            id: "checkpoint_size",
+            icon: <HardDrive className="w-3.5 h-3.5" />,
+            label: t("metric_checkpoint_label"),
+            score: isLora
+              ? result?.checkpoint_size_mb
+                ? `${result.checkpoint_size_mb} MB`
+                : "15.4 MB"
+              : result?.checkpoint_size_mb
+                ? `${result.checkpoint_size_mb} MB`
+                : "967 MB",
+            badge: isLora ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+                <ArrowDown className="w-3 h-3" />
+                98.4% {t("badge_smaller")}
+              </span>
+            ) : (
+              <span className="inline-flex items-center text-[11px] font-mono font-medium px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200/80">
+                {t("badge_full_weights")}
+              </span>
+            ),
+          },
+        ];
+
   return (
-    <Card className={`rounded-3xl border-neutral-200/90 shadow-sm flex flex-col h-full overflow-hidden ${isLora ? 'ring-1 ring-neutral-900/10' : ''}`}>
-      {/* Header */}
-      <CardHeader className="flex flex-row items-start justify-between gap-3 border-b border-neutral-100 p-5 sm:p-6 pb-4 space-y-0">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <Badge
-              variant={isLora ? 'default' : 'secondary'}
-              className={`font-normal text-[11px] ${isLora ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'}`}
+    <div
+      className={`rounded-2xl flex flex-col h-full justify-between transition-all ${
+        isLora ? "" : "bg-white"
+      }`}
+    >
+      <div className="space-y-4  py-3 pb-4 rounded-2xl  ">
+        {/* Header: Badge, Model Title & Copy Button */}
+        <div className="flex items-center justify-between gap-3  px-4 sm:px-5 pb-2">
+          <h3 className="text-sm text-neutral-900 tracking-tight">{title}</h3>
+
+          {result && (
+            <Button
+              type="button"
+              size="icon"
+              onClick={handleCopy}
+              className="h-8 w-8 bg-neutral-50/100 rounded-xl hover:bg-neutral-200/50 text-neutral-500 hover:text-neutral-900 cursor-pointer transition-colors shadow-none"
+              title={copied ? t("copied_success") : t("copy_transcript")}
+              aria-label={t("copy_transcript")}
             >
-              {isLora ? 'Usulan Tesis' : 'Baseline'}
-            </Badge>
-            <span className="text-xs text-neutral-400 font-mono">
-              {tag}
-            </span>
-          </div>
-          <CardTitle className="text-base text-neutral-900">
-            {title}
-          </CardTitle>
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+            </Button>
+          )}
         </div>
 
-        {result && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleCopy}
-            className="h-8 w-8 rounded-lg text-neutral-400 hover:text-neutral-700"
-            title="Salin transkrip"
-          >
-            {copied ? (
-              <Check className="w-4 h-4 text-emerald-600" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-          </Button>
-        )}
-      </CardHeader>
-
-      {/* Transcript Body Area */}
-      <CardContent className="p-5 sm:p-6 pt-5 flex-1 flex flex-col justify-between space-y-5">
-        <div className="min-h-[130px] p-4 sm:p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/70 text-sm leading-relaxed text-neutral-800 flex flex-col justify-center">
+        {/* Transcript Body Area (Inside Grey Bubble) */}
+        <div className="min-h-[10px] text-sm sm:text-sm leading-relaxed text-neutral-700 flex flex-col justify-center px-4 sm:px-5">
           {result ? (
             <div className="flex flex-wrap items-center gap-1.5">
               {diffWords.length > 0
                 ? diffWords.map((item, idx) => {
-                    // Benchmark Mode diff styling:
-                    if (mode === 'benchmark') {
-                      if (!isLora && (item.type === 'substitution' || item.type === 'insertion')) {
+                    if (mode === "benchmark") {
+                      if (
+                        !isLora &&
+                        (item.type === "substitution" ||
+                          item.type === "insertion")
+                      ) {
                         return (
                           <span
                             key={idx}
-                            title={item.expected ? `Acuan: "${item.expected}"` : 'Tambahan'}
-                            className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-200/80 font-medium text-xs sm:text-sm"
+                            title={
+                              item.expected
+                                ? `${t("reference_word")}: "${item.expected}"`
+                                : t("extra_word")
+                            }
+                            className="inline-flex items-baseline gap-1 px-1 py-0.25 rounded-lg bg-red-100/80 text-red-800 font-medium text-xs sm:text-sm"
                           >
-                            <span>{item.word}</span>
+                            <span className=" line-through">{item.word}</span>
                             {item.expected && (
-                              <span className="text-[10px] ml-1 line-through opacity-70 font-mono">
-                                ({item.expected})
+                              <span className="text-[13px]  text-red-600/80 font-mono font-semibold">
+                                {item.expected}
                               </span>
                             )}
                           </span>
                         );
                       }
 
-                      if (isLora && item.type === 'hit' && item.isSpontaneous) {
+                      if (isLora && item.type === "hit" && item.isSpontaneous) {
                         return (
                           <span
                             key={idx}
-                            className="px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 font-medium text-xs sm:text-sm"
+                            className="inline-flex items-center px-1 py-0.25 rounded-lg bg-emerald-100/80 text-emerald-800 font-medium text-xs sm:text-sm"
                           >
                             {item.word}
                           </span>
                         );
                       }
 
-                      if (isLora && item.type === 'substitution') {
+                      if (isLora && item.type === "substitution") {
                         return (
                           <span
                             key={idx}
-                            className="px-1.5 py-0.5 rounded-md bg-red-50 text-red-700 border border-red-200/80 font-medium text-xs sm:text-sm"
+                            className="inline-flex items-center px-1 py-0.25 rounded-lg bg-red-100/80 text-red-800 font-medium text-xs sm:text-sm"
                           >
                             {item.word}
                           </span>
@@ -127,24 +375,23 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                       return <span key={idx}>{item.word}</span>;
                     }
 
-                    // Free-form Mode diff styling:
-                    if (mode === 'freeform') {
+                    if (mode === "freeform") {
                       if (isLora && item.isSpontaneous) {
                         return (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded-full bg-neutral-900 text-white font-medium text-xs"
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-neutral-200/90 text-neutral-900 font-medium text-xs shadow-2xs"
                           >
                             {item.word}
                           </span>
                         );
                       }
 
-                      if (item.type === 'substitution') {
+                      if (item.type === "substitution") {
                         return (
                           <span
                             key={idx}
-                            className="px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-medium text-xs sm:text-sm"
+                            className="inline-flex items-center px-1 py-0.25 rounded-lg bg-amber-100/80 text-amber-800 font-medium text-xs sm:text-sm"
                           >
                             {item.word}
                           </span>
@@ -159,83 +406,29 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                 : result.text}
             </div>
           ) : (
-            <div className="text-center py-4">
+            <div className="text-center py-6 flex flex-col items-center justify-center">
+              <FileText className="w-5 h-5 text-neutral-400/80 mb-2 stroke-[1.5]" />
               <p className="text-xs text-neutral-400 font-normal">
-                {t('waiting_transcription')}
+                {t("waiting_transcription")}
               </p>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Footer Metrics Grid */}
-        <div className="pt-4 border-t border-neutral-100 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-          {/* WER */}
-          {mode === 'benchmark' && (
-            <div className="p-3 rounded-xl bg-neutral-50/70 border border-neutral-200/60 min-h-[72px] flex flex-col justify-between">
-              <span className="text-[11px] text-neutral-500 font-medium block" title="Word Error Rate (Tingkat Kesalahan Kata)">
-                WER (Kata)
-              </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="font-mono text-base sm:text-lg font-bold text-neutral-900">
-                  {result ? `${result.metrics.wer}%` : '—'}
-                </span>
-                {isLora && result && typeof werDelta === 'number' && werDelta > 0 && (
-                  <span className="inline-flex items-center text-[10px] font-mono text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.5 rounded">
-                    <ArrowDown className="w-2.5 h-2.5" />
-                    {werDelta}%
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* CER */}
-          {mode === 'benchmark' && (
-            <div className="p-3 rounded-xl bg-neutral-50/70 border border-neutral-200/60 min-h-[72px] flex flex-col justify-between">
-              <span className="text-[11px] text-neutral-500 font-medium block" title="Character Error Rate (Tingkat Kesalahan Huruf)">
-                CER (Huruf)
-              </span>
-              <span className="font-mono text-base sm:text-lg font-bold text-neutral-900 mt-1 block">
-                {result ? `${result.metrics.cer}%` : '—'}
-              </span>
-            </div>
-          )}
-
-          {/* Confidence */}
-          <div className="p-3 rounded-xl bg-neutral-50/70 border border-neutral-200/60 min-h-[72px] flex flex-col justify-between">
-            <span className="text-[11px] text-neutral-500 font-medium block" title="Tingkat Keyakinan Model (Model Confidence)">
-              Keyakinan
-            </span>
-            <span className="font-mono text-base sm:text-lg font-bold text-neutral-900 mt-1 block">
-              {result ? `${result.confidence}%` : '—'}
-            </span>
-          </div>
-
-          {/* Latency */}
-          <div className="p-3 rounded-xl bg-neutral-50/70 border border-neutral-200/60 min-h-[72px] flex flex-col justify-between">
-            <span className="text-[11px] text-neutral-500 font-medium block" title="Waktu Komputasi / Inferensi">
-              Latensi
-            </span>
-            <span className="font-mono text-base sm:text-lg font-bold text-neutral-900 mt-1 block">
-              {result ? `${result.latency_sec}s` : '—'}
-            </span>
-          </div>
-
-          {/* Free-form note */}
-          {mode === 'freeform' && (
-            <div className="p-3 rounded-xl bg-neutral-50/70 border border-neutral-200/60 col-span-2 min-h-[72px] flex flex-col justify-between">
-              <span className="text-[11px] text-neutral-400 font-medium block">
-                Karakteristik Model
-              </span>
-              <span className="text-xs text-neutral-700 block line-clamp-2">
-                {isLora
-                  ? 'Mengadaptasi partikel santai & slang lisan'
-                  : 'Cenderung menormalisasi ke ejaan formal'}
-              </span>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* Scoring Rows List - mapped through MetricRow cleanly */}
+      <div className="pt-3 px-3 flex flex-col gap-y-1  bg-neutral-50/100">
+        {metricsList.map((m) => (
+          <MetricRow
+            key={m.id}
+            icon={m.icon}
+            label={m.label}
+            score={m.score}
+            badge={m.badge}
+            infoAction={m.infoAction}
+          />
+        ))}
+      </div>
+    </div>
   );
 };

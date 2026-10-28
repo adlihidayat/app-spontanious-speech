@@ -161,12 +161,14 @@ export async function simulateTranscription(
         text: freeformBase,
         confidence: 82.3,
         latency_sec: 2.38,
+        audio_duration_sec: 5.2,
         metrics: { wer: 0, cer: 0, substitutions: 0, deletions: 0, insertions: 0, hits: 0 }
       },
       lora_model: {
         text: freeformLora,
         confidence: 95.7,
         latency_sec: 2.44,
+        audio_duration_sec: 5.2,
         metrics: { wer: 0, cer: 0, substitutions: 0, deletions: 0, insertions: 0, hits: 0 }
       },
       comparison: {
@@ -177,6 +179,102 @@ export async function simulateTranscription(
       }
     };
   }
+}
+
+/**
+ * Returns synchronous mock comparison data for a preset prompt
+ */
+export function getPresetMockResponse(promptId: number = 1): TranscribeResponse {
+  const prompt = BENCHMARK_PROMPTS.find((p) => p.id === promptId) || BENCHMARK_PROMPTS[0];
+  const preset = PRESET_RESPONSES[prompt.id] || PRESET_RESPONSES[1];
+  const reference = prompt.text;
+
+  const baseAlign = computeWordAlignment(reference, preset.baseText);
+  const loraAlign = computeWordAlignment(reference, preset.loraText);
+
+  const spontaneousWords = detectSpontaneousWords(preset.loraText);
+  const werRedAbs = Number(Math.max(0, baseAlign.metrics.wer - loraAlign.metrics.wer).toFixed(2));
+  const werRedPct =
+    baseAlign.metrics.wer > 0
+      ? Number(((werRedAbs / baseAlign.metrics.wer) * 100).toFixed(1))
+      : 100;
+
+  return {
+    status: "success",
+    mode: "benchmark",
+    ground_truth_normalized: normalizeText(reference),
+    base_model: {
+      text: preset.baseText,
+      confidence: preset.baseConfidence,
+      latency_sec: preset.baseLatency,
+      metrics: baseAlign.metrics,
+    },
+    lora_model: {
+      text: preset.loraText,
+      confidence: preset.loraConfidence,
+      latency_sec: preset.loraLatency,
+      metrics: loraAlign.metrics,
+    },
+    comparison: {
+      wer_reduction_absolute: werRedAbs,
+      wer_reduction_relative_pct: werRedPct,
+      cer_reduction_absolute: Number(
+        Math.max(0, baseAlign.metrics.cer - loraAlign.metrics.cer).toFixed(2)
+      ),
+      spontaneous_words_detected: spontaneousWords,
+    },
+  };
+}
+
+/**
+ * Returns synchronous mock comparison data for freeform mode
+ */
+export function getFreeformMockResponse(): TranscribeResponse {
+  const freeformLora =
+    "Wah jujurly kemarin tuh seru banget sih pas kita nongkrong bareng, lu besok mau ikut lagi nggak?";
+  const freeformBase =
+    "Wah sejujurnya kemarin itu seru sekali waktu kita berkumpul bersama, kamu besok mau ikut lagi tidak?";
+
+  const spontaneousWords = detectSpontaneousWords(freeformLora);
+
+  return {
+    status: "success",
+    mode: "freeform",
+    base_model: {
+      text: freeformBase,
+      confidence: 82.3,
+      latency_sec: 2.38,
+      audio_duration_sec: 5.2,
+      metrics: {
+        wer: 0,
+        cer: 0,
+        substitutions: 0,
+        deletions: 0,
+        insertions: 0,
+        hits: 0,
+      },
+    },
+    lora_model: {
+      text: freeformLora,
+      confidence: 95.7,
+      latency_sec: 2.44,
+      audio_duration_sec: 5.2,
+      metrics: {
+        wer: 0,
+        cer: 0,
+        substitutions: 0,
+        deletions: 0,
+        insertions: 0,
+        hits: 0,
+      },
+    },
+    comparison: {
+      wer_reduction_absolute: 0,
+      wer_reduction_relative_pct: 0,
+      cer_reduction_absolute: 0,
+      spontaneous_words_detected: spontaneousWords,
+    },
+  };
 }
 
 /**
