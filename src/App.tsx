@@ -176,7 +176,7 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-8 space-y-8">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-8 space-y-8">
         {/* Dual Mode Switcher */}
         <ModeSwitcher
           currentMode={mode}
@@ -226,7 +226,7 @@ export function App() {
 
       {/* Minimal Academic Footer */}
       <footer className="mt-auto border-t border-neutral-100 py-6 text-xs text-neutral-400">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>
             Platform Evaluasi Tesis: Pengenalan Ujaran Spontan Bahasa Indonesia
             (PEFT-LoRA)

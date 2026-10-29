@@ -297,7 +297,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
         isLora ? "" : "bg-white"
       }`}
     >
-      <div className="relative z-10 flex-1 flex flex-col space-y-2 py-4 rounded-2xl border border-neutral-200/70 bg-white shadow-none">
+      <div className="relative z-10 flex-1 flex flex-col space-y-2 py-4 pb-6 rounded-2xl border border-neutral-200/70 bg-white shadow-none">
         {/* Header: Badge, Model Title & Copy Button */}
         <div className="flex items-center justify-between gap-3 px-4 sm:px-5">
           <h3 className="text-sm font-semibold text-neutral-900 tracking-tight flex space-x-2 items-center">
@@ -385,7 +385,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({
                         return (
                           <span
                             key={idx}
-                            className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-neutral-200/90 text-neutral-900 font-medium text-xs shadow-2xs"
+                            className="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-neutral-200/50 text-neutral-900 font-medium text-xs shadow-2xs"
                           >
                             {item.word}
                           </span>

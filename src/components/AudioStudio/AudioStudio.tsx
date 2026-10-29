@@ -15,7 +15,6 @@ import {
   X,
   AlertCircle,
   FileAudio,
-  Sparkles,
 } from "lucide-react";
 
 interface AudioStudioProps {
@@ -399,13 +398,11 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`rounded-3xl border transition-all bg-white overflow-hidden shadow-sm ${
-        isDragging
-          ? "border-neutral-900 ring-2 ring-neutral-900/10 bg-neutral-50/50"
-          : "border-neutral-200/70"
+      className={`rounded-3xl border-none p-0 transition-all bg-white overflow-hidden ${
+        isDragging ? "ring-2 ring-neutral-300" : ""
       }`}
     >
-      <CardContent className="p-5 sm:p-6 space-y-4">
+      <CardContent className="p-0 my-4 space-y-4">
         {/* Top Area: Prompt Teleprompter (Benchmark) or Free-Form with H1/H2 Title and Inside Bubble */}
         {mode === "benchmark" ? (
           <PromptTeleprompter
@@ -466,7 +463,7 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
         {/* Bottom Action Bar: Upload (+) & Start (Mic) on the Left; Model Name & Send on the Right */}
         <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
           {/* Left: Upload (+), Mic, Audio Wave / File Badge, and Status Text */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <input
               ref={fileInputRef}
               type="file"
@@ -483,9 +480,9 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
               onClick={() => fileInputRef.current?.click()}
               disabled={isAnalyzing || isRecording}
               title={t("upload_btn")}
-              className="h-9 w-9 rounded-xl border border-neutral-200/90 text-neutral-500 hover:text-neutral-900 bg-white hover:bg-neutral-50 shadow-2xs cursor-pointer"
+              className="px-2.5 h-9 w-fit rounded-full border border-neutral-200/90 text-neutral-500 hover:text-neutral-900 bg-white hover:bg-neutral-50 shadow-2xs cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
             </Button>
 
             {/* Start / Stop Recording (Mic) Button */}
@@ -496,7 +493,7 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isAnalyzing}
               title={isRecording ? t("stop_btn") : t("record_btn")}
-              className={`h-9 w-9 rounded-xl transition-all cursor-pointer shadow-2xs ${
+              className={`px-2.5 h-9 w-fit rounded-full transition-all cursor-pointer shadow-2xs ${
                 isRecording
                   ? "border border-neutral-200/90 text-red-500 hover:text-neutral-900 bg-white hover:bg-neutral-50"
                   : "border border-neutral-200/90 text-neutral-500 hover:text-neutral-900 bg-white hover:bg-neutral-50"
@@ -505,13 +502,13 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
               {isRecording ? (
                 <Square className="w-3.5 h-3.5 fill-current" />
               ) : (
-                <Mic className="w-4 h-4" />
+                <Mic className="w-3.5 h-3.5" />
               )}
             </Button>
 
             {/* On Recording: simple audio wave beside mic with record time max 15s */}
             {isRecording && (
-              <div className="inline-flex items-center gap-2 h-9 px-2.5 rounded-xl bg-red-50/80 border border-red-200/80 text-red-600 shadow-2xs">
+              <div className="inline-flex items-center gap-2 h-9 px-2.5 rounded-full bg-red-50/80 border border-red-200/80 text-red-600 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping flex-shrink-0" />
                 <span className="font-mono text-xs font-semibold whitespace-nowrap">
                   {recordingSeconds}s / 15s
@@ -527,17 +524,17 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
 
             {/* After finished or file uploaded: file badge with grey color and x button between mic and audio attached */}
             {audioSource && !isRecording && (
-              <div className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-neutral-100 border border-neutral-200/90 text-xs text-neutral-700 shadow-2xs max-w-[260px] sm:max-w-[320px]">
+              <div className="inline-flex items-center gap-1.5 h-9 px-2.5 rounded-full bg-neutral-100 border border-neutral-200/90 text-xs text-neutral-700 group shadow-2xs max-w-[260px] sm:max-w-[320px]">
                 <button
                   type="button"
                   onClick={togglePlay}
-                  className="p-0.5 hover:text-neutral-900 rounded cursor-pointer transition-colors"
+                  className="p-0.5 text-neutral-800 hover:text-neutral-400 rounded cursor-pointer transition-colors"
                   title={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
-                    <Pause className="w-3 h-3 fill-current text-neutral-800" />
+                    <Pause className="w-3 h-3 fill-current" />
                   ) : (
-                    <Play className="w-3 h-3 fill-current text-neutral-800 ml-0.5" />
+                    <Play className="w-3 h-3 fill-current ml-0.5" />
                   )}
                 </button>
                 <FileAudio className="w-3.5 h-3.5 text-neutral-500 flex-shrink-0" />
@@ -556,24 +553,6 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
               </div>
             )}
 
-            <span className="text-xs text-neutral-400 hidden sm:inline ml-1">
-              {audioSource
-                ? t("audio_attached")
-                : !isRecording
-                  ? t("audio_hint_empty")
-                  : null}
-            </span>
-          </div>
-
-          {/* Right: Model Name Badge & Circular Send Button */}
-          <div className="flex items-center gap-2">
-            {/* Model Name Badge */}
-            <div className="flex items-center gap-1.5 h-9 px-3 rounded-full  text-stone-600 text-sm font-medium shadow-2xs select-none">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
-              <span>Whisper Small</span>
-            </div>
-
-            {/* Send / Transcribe Button (Circular ArrowUp, disabled when no audio) */}
             <Button
               type="button"
               size="icon"
@@ -586,20 +565,34 @@ export const AudioStudio: React.FC<AudioStudioProps> = ({
                     ? t("analyzing_btn")
                     : t("analyze_btn")
               }
-              className={`h-9 w-9 rounded-full transition-all cursor-pointer ${
+              className={`px-4 h-9 w-fit font-normal rounded-full transition-all cursor-pointer ${
                 !audioSource || isRecording
-                  ? "bg-blue-100 text-blue-300 border border-blue-200/60 cursor-not-allowed hover:bg-blue-100"
+                  ? "bg-black/50 text-white border border-black/0 cursor-not-allowed hover:bg-black"
                   : isAnalyzing
                     ? "bg-[#0070f3] text-white cursor-wait"
-                    : "bg-[#0070f3] text-white hover:bg-[#0060df] shadow-xs active:scale-95"
+                    : "bg-black/85 text-white hover:bg-black/60 shadow-xs active:scale-95"
               }`}
             >
               {isAnalyzing ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <div className="flex items-center gap-x-2">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Loading</span>
+                </div>
               ) : (
-                <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                <div className="flex items-center gap-x-2">
+                  <ArrowUp className="w-3.5 h-3.5 stroke-[2]" />
+                  <span>Transcript</span>
+                </div>
               )}
             </Button>
+
+            <span className="text-xs text-neutral-400 hidden sm:inline ml-1">
+              {audioSource
+                ? t("audio_attached")
+                : !isRecording
+                  ? t("audio_hint_empty")
+                  : null}
+            </span>
           </div>
         </div>
       </CardContent>

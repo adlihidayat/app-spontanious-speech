@@ -60,10 +60,10 @@ export const PromptTeleprompter: React.FC<PromptTeleprompterProps> = ({
       </div>
 
       {/* Inside Bubble with grey background: Prompt, Case Name, and Text Guide */}
-      <div className="rounded-2xl bg-neutral-50/60 border border-neutral-200/80">
+      <div className="rounded-2xl  border border-neutral-200/80">
         {/* Header row inside bubble: Prompt index and Case name */}
-        <div className="flex items-center justify-between p-4 sm:p-5 py-1 sm:py-2 border-b border-neutral-200/80">
-          <span className="font-mono text-sm text-neutral-500 font-medium shadow-2xs">
+        <div className="flex items-center justify-between p-4 sm:p-5 py-1 sm:py-2 border-b border-neutral-200/80 bg-neutral-50/60">
+          <span className="font-mono text-sm text-neutral-500 font-semibold shadow-2xs">
             {t("case_label")} {currentPrompt.id} :{" "}
             {getCategoryText(currentPrompt.id, currentPrompt.category)}
           </span>
@@ -80,7 +80,7 @@ export const PromptTeleprompter: React.FC<PromptTeleprompterProps> = ({
 
         {/* Prompt detail transcript */}
         <div className="py-1 p-4 sm:p-5">
-          <p className="text-base tracking-tight text-neutral-900 leading-relaxed">
+          <p className="text-sm tracking-tight text-neutral-900 leading-relaxed">
             "{groundTruth}"
           </p>
         </div>

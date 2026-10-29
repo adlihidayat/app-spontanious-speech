@@ -14,7 +14,7 @@ export const Header: React.FC<HeaderProps> = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-neutral-200/80 bg-white/90 backdrop-blur-md">
-      <div className="max-w-5xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         {/* Left: Branding & Subtitle */}
         <div className="flex items-center gap-3">
           <Sparkles className="w-5 h-5 text-black" />
@@ -30,7 +30,7 @@ export const Header: React.FC<HeaderProps> = () => {
             variant="outline"
             size="sm"
             asChild
-            className="h-8 gap-1.5 text-xs text-neutral-600 rounded-lg shadow-sm bg-orange-500/95 hover:bg-orange-500/75 text-white"
+            className="h-8 gap-1.5 text-xs text-neutral-600 rounded-full shadow-sm bg-orange-500/95 hover:bg-orange-500/75 text-white"
           >
             <a
               href="https://github.com/adlihidayat/app-spontanious-speech#notebooks"
@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = () => {
             variant="outline"
             size="sm"
             asChild
-            className="h-8 gap-1.5 text-xs text-neutral-600 rounded-lg shadow-sm bg-black/90 hover:bg-black/70 text-white"
+            className="h-8 gap-1.5 text-xs text-neutral-600 rounded-full shadow-sm bg-black/90 hover:bg-black/70 text-white"
           >
             <a
               href="https://github.com/adlihidayat/app-spontanious-speech"
@@ -60,11 +60,11 @@ export const Header: React.FC<HeaderProps> = () => {
           </Button>
 
           {/* Language Switcher */}
-          <div className="flex items-center h-8 rounded-lg border border-neutral-200 bg-neutral-100/50 p-0.5 shadow-sm">
+          <div className="flex items-center h-8 rounded-full border border-neutral-200 bg-neutral-100/50 p-0.5 shadow-sm">
             <button
               type="button"
               onClick={() => setLanguage("id")}
-              className={`h-full w-12 inline-flex items-center justify-center text-xs rounded-md font-medium transition-colors cursor-pointer ${
+              className={`h-full w-12 inline-flex items-center justify-center text-xs rounded-full font-medium transition-colors cursor-pointer ${
                 language === "id"
                   ? "bg-white text-neutral-900 shadow-xs border border-neutral-200"
                   : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200"
@@ -75,7 +75,7 @@ export const Header: React.FC<HeaderProps> = () => {
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`h-full w-12 inline-flex items-center justify-center text-xs rounded-md font-medium transition-colors cursor-pointer ${
+              className={`h-full w-12 inline-flex items-center justify-center text-xs rounded-full font-medium transition-colors cursor-pointer ${
                 language === "en"
                   ? "bg-white text-neutral-900 shadow-xs border border-neutral-200"
                   : "text-neutral-500 hover:text-neutral-900 hover:bg-neutral-200"
